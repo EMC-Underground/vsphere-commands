@@ -18,3 +18,14 @@ Then add **hubot-vsphere-commands** to your `external-scripts.json`:
 ]
 ```
 
+Once this is complete, add the config file to your base hubot directory
+
+'touch v-config.json'
+
+Add the following to that file:
+
+```json
+{
+  "url": "<vSphere-api-url>"
+}
+```

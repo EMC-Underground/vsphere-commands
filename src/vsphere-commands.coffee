@@ -63,7 +63,7 @@ module.exports = (robot) ->
   robot.respond /(show vm) (.*)/i, (msg) ->
     uuid = msg.match[2]
     msg.send "Searching for vm with uuid of #{uuid}"
-    robot.http(data['url'] + "vms/#{uuid}")
+    robot.http(data['url'] + "vms/#{uuid}/")
       .get() (err, res, body) ->
         if err
           robot.logger.info "Encountered an error: #{err}"

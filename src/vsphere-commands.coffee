@@ -113,6 +113,7 @@ module.exports = (robot) ->
         return 
       return    
 
+  #TODO show what the current changable specs are before asking what to change
   robot.respond /(change vm) (.*)/i, (msg) ->
     robot.send {room: msg.envelope.user.name}, "That's a perfectly good vm...but ok! Let's do it!"
     uuid = msg.match[2]

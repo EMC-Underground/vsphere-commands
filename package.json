@@ -7,10 +7,10 @@
   "keywords": "hubot, hubot-scripts, vmware",
   "repository": {
     "type": "git",
-    "url": "git://github.com/hubot-scripts/hubot-vsphere-commands.git"
+    "url": "git://github.com/quickjp2/hubot-vsphere-commands.git"
   },
   "bugs": {
-    "url": "https://github.com/hubot-scripts/hubot-vsphere-commands/issues"
+    "url": "https://github.com/quickjp2/hubot-vsphere-commands/issues"
   },
   "dependencies": {},
   "peerDependencies": {

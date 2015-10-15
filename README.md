@@ -29,3 +29,5 @@ Add the following to that file:
   "url": "<vSphere-api-url>"
 }
 ```
+
+Afterwards, jump over to the [REST API](https://github.com/quickjp2/vsphere-python-restapi) that this communicates with.

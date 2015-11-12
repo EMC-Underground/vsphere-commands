@@ -33,16 +33,6 @@ fs.readFile './v-config.json', (err, contents) ->
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 authToken = ""
 
-printVM = (msg, vms, i, robot)->
-  if vms[i] != undefined
-    robot.logger.info "Name: #{vms[i]['name']} UUID: #{vms[i]['instanceUuid']} OS: #{vms[i]['guestFullName']}"
-    msg.send "Name: #{vms[i]['name']} UUID: #{vms[i]['instanceUuid']} OS: #{vms[i]['guestFullName']}"
-    i = i + 1
-    setTimeout (-> printVM msg, vms, i, robot),500
-  else
-    msg.send "Done and ready to receive more commands!"
-
-
 module.exports = (robot) ->
 
   robot.respond /(list all vms)/i, (msg) ->
@@ -54,11 +44,14 @@ module.exports = (robot) ->
         else
           msg.send "We got vms..and there's a lot...let me filter this for you...please wait"
           vms = JSON.parse(body)['vm']
-          i=0
-          robot.logger.info "Name: #{vms[i]["name"]} UUID: #{vms[i]['instanceUuid']} OS: #{vms[i]['guestFullName']}"
-          msg.send "Name: #{vms[i]["name"]} UUID: #{vms[i]['instanceUuid']} OS: #{vms[i]['guestFullName']}"
-          i = i + 1
-          setTimeout (-> printVM msg, vms, i, robot), 500
+          i = 0
+          all_vms = "1": "Name: #{vms[i]['name']} UUID: #{vms[i]['instanceUuid']} OS: #{vms[i]['guestFullName']}"
+          i = 1
+          for vm in vms
+            all_vms[i+1] = "Name: #{vm['name']} UUID: #{vm['instanceUuid']} OS: #{vm['guestFullName']}"
+            i = i + 1
+          robot.logger.info all_vms
+          msg.send "#{JSON.stringify(all_vms, null, 2)}"
 
   robot.respond /(show vm) (.*)/i, (msg) ->
     uuid = msg.match[2]

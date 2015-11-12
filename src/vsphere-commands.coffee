@@ -99,7 +99,7 @@ module.exports = (robot) ->
                   return
                 else
                   robot.send {room: msg.envelope.user.name}, "#{body}"
-                  msg.send "I have created a vm with this payload #{payload}"
+                  msg.send "I have created a vm with this payload #{JSON.stringify(payload, null, 2)}"
                   return
             return
           return

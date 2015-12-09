@@ -85,9 +85,13 @@ module.exports = (robot) ->
         robot.send {room: msg.envelope.user.name}, "What would you like to call it? (Please no spaces; format: name <name>)"
         robot.respond /(name) (.*)/i, (nameMSG) ->
           name = nameMSG.match[2]
-          robot.send {room: msg.envelope.user.name}, "One more thing...what's the os? Please use vmware's guestid. (Format: guestid <guestid>)"
-          robot.respond /(guestid) (.*)/i, (guestMSG) ->
+          robot.send {room: msg.envelope.user.name}, "One more thing...what's the os? Sadly we can only do Ubuntu so far, so please type: os ubuntu"
+          robot.respond /(os) (.*)/i, (guestMSG) ->
             guestid = guestMSG.match[2]
+            if guestid == "ubuntu"
+              guestid = "ubuntu64Guest"
+            else
+              guestid = "ubuntu64Guest"
             robot.send {room: msg.envelope.user.name}, "Making a #{guestid} vm named #{name} with #{memory} megabytes of memory and #{cpu} CPUs"
             payload = {datastore:"scaleio_vmw", mem:"#{memory}", cpus:"#{cpu}", name:"#{name}", guestid:"#{guestid}", vm_version:"vmx-10"}
             robot.http(data['url'] + "vms/")

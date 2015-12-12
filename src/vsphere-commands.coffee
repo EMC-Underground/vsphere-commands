@@ -93,7 +93,7 @@ module.exports = (robot) ->
             else
               guestid = "ubuntu64Guest"
             robot.send {room: msg.envelope.user.name}, "Making a #{guestid} vm named #{name} with #{memory} megabytes of memory and #{cpu} CPUs"
-            payload = {datastore:"scaleio_vmw", mem:"#{memory}", cpus:"#{cpu}", name:"#{name}", guestid:"#{guestid}", vm_version:"vmx-10"}
+            payload = {datastore:"scaleio_vmw", mem:"#{memory}", cpus:"#{cpu}", name:"#{name}", guestid:"#{guestid}", vm_version:"vmx-10", user:"#{msg.envelope.user.name}"}
             robot.http(data['url'] + "vms/")
               .header('Content-Type', 'application/json')
               .post(JSON.stringify(payload)) (err, res, body) ->
@@ -108,7 +108,8 @@ module.exports = (robot) ->
             return
           return
         return 
-      return    
+      return
+    return    
 
   #TODO show what the current changable specs are before asking what to change
   robot.respond /(change vm) (.*)/i, (msg) ->

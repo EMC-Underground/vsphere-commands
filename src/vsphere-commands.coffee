@@ -107,9 +107,10 @@ module.exports = (robot) ->
                   return
             return
           return
-        return 
+        return
       return
-    return    
+    return
+  return
 
   #TODO show what the current changable specs are before asking what to change
   robot.respond /(change vm) (.*)/i, (msg) ->

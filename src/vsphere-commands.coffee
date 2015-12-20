@@ -33,6 +33,76 @@ fs.readFile './v-config.json', (err, contents) ->
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 authToken = ""
 
+get_cpus = (robot, username, packet) ->
+  # Get data from user
+  robot.send {room: username}, "Now how many cpus? (Format: cpus <num>)"
+  robot.respond /(cpus) (.*)/i, (cpuMSG) ->
+    cpu = cpuMSG.match[2]
+  # Add to packet
+  packet['cpus'] = cpu
+  return
+
+get_mem = (robot, username, packet) ->
+  # Get data from user
+  robot.send {room: username}, "First, how much memory in megabytes?(Format: mem <num>)"
+  robot.respond /(mem) (.*)/i, (memMSG) ->
+    memory = memMSG.match[2]
+    # Add to packet
+    packet['mem'] = memory
+    return
+
+get_vm_name = (robot, username, packet) ->
+  # Get data from user
+  robot.send {room: username}, "What would you like to call it? (Please no spaces; format: name <name>)"
+  robot.respond /(name) (.*)/i, (nameMSG) ->
+    name = nameMSG.match[2]
+  # Add to packet
+  packet['name'] = name
+  return
+
+get_vm_guestid = (robot, username, packet) ->
+  # Get data from user
+  robot.send {room: username}, "One more thing...what's the os? Sadly we can only do Ubuntu so far, so please type: os ubuntu"
+  robot.respond /(os) (.*)/i, (guestMSG) ->
+    guestid = guestMSG.match[2]
+    if guestid == "ubuntu"
+      guestid = "ubuntu64Guest"
+    else
+      guestid = "ubuntu64Guest"
+  # Add to packet
+  packet['guestid'] = guestid
+  return
+send_api_packet = (robot, username, room, packet) ->
+  #
+  robot.http(data['url'] + "vms/")
+    .header('Content-Type', 'application/json')
+    .post(JSON.stringify(packet)) (err, res, body) ->
+      if err
+        robot.logger.info "Encountered an error: #{err}"
+        robot.send {room: username}, "Encountered an error: #{err}"
+      else
+        robot.send {room: username}, "#{body}"
+        robot.send {room: room} "I have created a vm with this payload #{JSON.stringify(packet, null, 2)}"
+  return
+
+# Contains all function calls that are needed to create a vm
+create_vm = (robot, username, room, count, packet) ->
+  while count < 6
+    switch count
+      when 1 then get_mem(robot, username, packet)
+      when 2 then get_cpus(robot, username, packet)
+      when 3 then get_vm_name(robot, username, packet)
+      when 4 then get_vm_guestid(robot, username, packet)
+      when 5 then
+        robot.send {room: username}, "Making a #{packet['guestid']}
+                                      vm named #{packet['name']}
+                                      with #{packet['mem']}
+                                      megabytes of memory and #{packet['cpus']} CPUs"
+
+        send_api_packet(robot, username, room, packet)
+    count = count + 1
+  return
+
 module.exports = (robot) ->
 
   robot.respond /(list all vms)/i, (msg) ->
@@ -76,41 +146,9 @@ module.exports = (robot) ->
           msg.send "#{body}"
 
   robot.respond /(create me vm)/i, (msg) ->
-    robot.send {room: msg.envelope.user.name}, "Lets do it! First, how much memory in megabytes?(Format: <num> mem)"
-    robot.respond /(.*) (mem)/i, (memMSG) ->
-      memory = memMSG.match[1]
-      robot.send {room: msg.envelope.user.name}, "Now how many cpus? (Format: <num> cpus)"
-      robot.respond /(.*) (cpus)/i, (cpuMSG) ->
-        cpu = cpuMSG.match[1]
-        robot.send {room: msg.envelope.user.name}, "What would you like to call it? (Please no spaces; format: name <name>)"
-        robot.respond /(name) (.*)/i, (nameMSG) ->
-          name = nameMSG.match[2]
-          robot.send {room: msg.envelope.user.name}, "One more thing...what's the os? Sadly we can only do Ubuntu so far, so please type: os ubuntu"
-          robot.respond /(os) (.*)/i, (guestMSG) ->
-            guestid = guestMSG.match[2]
-            if guestid == "ubuntu"
-              guestid = "ubuntu64Guest"
-            else
-              guestid = "ubuntu64Guest"
-            robot.send {room: msg.envelope.user.name}, "Making a #{guestid} vm named #{name} with #{memory} megabytes of memory and #{cpu} CPUs"
-            payload = {datastore:"scaleio_vmw", mem:"#{memory}", cpus:"#{cpu}", name:"#{name}", guestid:"#{guestid}", vm_version:"vmx-10", user:"#{msg.envelope.user.name}"}
-            robot.http(data['url'] + "vms/")
-              .header('Content-Type', 'application/json')
-              .post(JSON.stringify(payload)) (err, res, body) ->
-                if err
-                  robot.logger.info "Encountered an error: #{err}"
-                  robot.send {room: msg.envelope.user.name}, "Encountered an error: #{err}"
-                  return
-                else
-                  robot.send {room: msg.envelope.user.name}, "#{body}"
-                  msg.send "I have created a vm with this payload #{JSON.stringify(payload, null, 2)}"
-                  return
-            return
-          return
-        return
-      return
-    return
-  return
+    robot.send {room: msg.envelope.user.name}, "Lets do it!"
+    packet = {datastore:"scaleio_vmw", vm_version:"vmx-10", user:"#{msg.envelope.user.name}"}
+    create_vm(robot, msg.envelope.user.name, msg.envelope.room, 0, packet)
 
   #TODO show what the current changable specs are before asking what to change
   robot.respond /(change vm) (.*)/i, (msg) ->

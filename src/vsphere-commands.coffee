@@ -38,9 +38,9 @@ get_cpus = (robot, username, packet) ->
   robot.send {room: username}, "Now how many cpus? (Format: cpus <num>)"
   robot.respond /(cpus) (.*)/i, (cpuMSG) ->
     cpu = cpuMSG.match[2]
-  # Add to packet
-  packet['cpus'] = cpu
-  return
+    # Add to packet
+    packet['cpus'] = cpu
+    return
 
 get_mem = (robot, username, packet) ->
   # Get data from user
@@ -56,9 +56,9 @@ get_vm_name = (robot, username, packet) ->
   robot.send {room: username}, "What would you like to call it? (Please no spaces; format: name <name>)"
   robot.respond /(name) (.*)/i, (nameMSG) ->
     name = nameMSG.match[2]
-  # Add to packet
-  packet['name'] = name
-  return
+    # Add to packet
+    packet['name'] = name
+    return
 
 get_vm_guestid = (robot, username, packet) ->
   # Get data from user
@@ -69,9 +69,10 @@ get_vm_guestid = (robot, username, packet) ->
       guestid = "ubuntu64Guest"
     else
       guestid = "ubuntu64Guest"
-  # Add to packet
-  packet['guestid'] = guestid
-  return
+    # Add to packet
+    packet['guestid'] = guestid
+    return
+
 send_api_packet = (robot, username, room, packet) ->
   #
   robot.http(data['url'] + "vms/")
@@ -82,7 +83,7 @@ send_api_packet = (robot, username, room, packet) ->
         robot.send {room: username}, "Encountered an error: #{err}"
       else
         robot.send {room: username}, "#{body}"
-        robot.send {room: room} "I have created a vm with this payload #{JSON.stringify(packet, null, 2)}"
+        robot.send {room: room}, "I have created a vm with this payload #{JSON.stringify(packet, null, 2)}"
   return
 
 # Contains all function calls that are needed to create a vm
@@ -93,7 +94,7 @@ create_vm = (robot, username, room, count, packet) ->
       when 2 then get_cpus(robot, username, packet)
       when 3 then get_vm_name(robot, username, packet)
       when 4 then get_vm_guestid(robot, username, packet)
-      when 5 then
+      when 5
         robot.send {room: username}, "Making a #{packet['guestid']}
                                       vm named #{packet['name']}
                                       with #{packet['mem']}

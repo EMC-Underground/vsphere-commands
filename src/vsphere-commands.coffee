@@ -23,6 +23,7 @@
 fs = require 'fs'
 http = require 'http'
 data = {}
+$ = require jQuery
 
 fs.readFile './v-config.json', (err, contents) ->
   if err
@@ -33,44 +34,47 @@ fs.readFile './v-config.json', (err, contents) ->
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 authToken = ""
 
-responses = ["sweet", "cool", "awesome", "fair enough"," sounds good", "ok", "fantastic", "roger that", "got it", "perfect"]
+responses = ["sweet", "cool", "awesome", "fair enough"," sounds good", "ok",
+              "fantastic", "roger that", "got it", "perfect"]
 
-get_cpus = (robot, username, home, packet, creating) ->
+get_cpus = (robot, username, home) ->
   # Get data from user
   robot.send {room: username}, "Now how many cpus? (Format: cpus <num>)"
+  var deferred_cpus = $.Deferred();
   robot.respond /(cpus) (.*)/i, (cpuMSG) ->
     cpu = cpuMSG.match[2]
     # Add to packet
-    packet['cpus'] = cpu
     cpuMSG.send responses[Math.floor(Math.random()* responses.length)]
-    if creating
-      create_vm(robot, username, home, 3, packet)
+    deferred_cpus.resolve(cpu)
+  return deferred_cpus.promise();
 
-get_mem = (robot, username, home, packet, creating) ->
+get_mem = (robot, username, home) ->
   # Get data from user
   robot.send {room: username}, "First, how much memory in megabytes?(Format: mem <num>)"
+  var deferred_mem = $.Deferred();
   robot.respond /(mem) (.*)/i, (memMSG) ->
     memory = memMSG.match[2]
     # Add to packet
-    packet['mem'] = memory
     memMSG.send responses[Math.floor(Math.random()* responses.length)]
-    if creating
-      create_vm(robot, username, home, 2, packet)
+    deferred_mem.resolve(memory)
+  return deferred_mem.promise();
 
 get_vm_name = (robot, username, home, packet, creating) ->
   # Get data from user
   robot.send {room: username}, "What would you like to call it? (Please no spaces; format: name <name>)"
+  var deferred_name = $.Deferred();
   robot.respond /(name) (.*)/i, (nameMSG) ->
     name = nameMSG.match[2]
     # Add to packet
-    packet['name'] = name
     nameMSG.send responses[Math.floor(Math.random()* responses.length)]
-    if creating
-      create_vm(robot, username, home, 4, packet)
+    deferred_name.resolve(name)
+  return deferred_name.promise();
 
-get_vm_guestid = (robot, username, home, packet, creating) ->
+get_vm_guestid = (robot, username, home) ->
   # Get data from user
-  robot.send {room: username}, "One more thing...what's the os? Sadly we can only do Ubuntu so far, so please type: os ubuntu"
+  robot.send {room: username}, "One more thing...what's the os?
+                                Sadly we can only do Ubuntu so far, so please type: os ubuntu"
+  var deferred_guestid = $.Deferred();
   robot.respond /(os) (.*)/i, (guestMSG) ->
     guestid = guestMSG.match[2]
     if guestid == "ubuntu"
@@ -78,10 +82,9 @@ get_vm_guestid = (robot, username, home, packet, creating) ->
     else
       guestid = "ubuntu64Guest"
     # Add to packet
-    packet['guestid'] = guestid
     guestMSG.send responses[Math.floor(Math.random()* responses.length)]
-    if creating
-      create_vm(robot, username, home, 5, packet)
+    deferred_guestid.resolve(guestid)
+  return deferred_guestid.promise();
 
 send_api_packet = (robot, username, home, packet, url) ->
   # Send a packet to the api
@@ -96,19 +99,29 @@ send_api_packet = (robot, username, home, packet, url) ->
         robot.send {room: home}, "I have created a vm with this payload #{JSON.stringify(packet, null, 2)}"
 
 # Contains all function calls that are needed to create a vm
-create_vm = (robot, username, home, count, packet) ->
-  switch count
-    when 1 then get_mem(robot, username, home, packet, true)
-    when 2 then get_cpus(robot, username, home, packet, true)
-    when 3 then get_vm_name(robot, username, home, packet, true)
-    when 4 then get_vm_guestid(robot, username, home, packet, true)
-    when 5
-      robot.send {room: username}, "Making a #{packet['guestid']}
-                                    vm named #{packet['name']}
-                                    with #{packet['mem']}
-                                    megabytes of memory and #{packet['cpus']} CPUs"
-      url = data['url'] + "vms/"
-      send_api_packet(robot, username, home, packet, url)
+create_vm = (robot, username, home, packet) ->
+  $.when( get_mem(robot, username, home) ).then (
+    function (memory) {
+      packet['mem'] = memory
+      $.when( get_cpus(robot, username, home) ).then(
+        function (cpu) {
+          packet['cpus'] = cpu
+          $.when( get_vm_name(robot, username, home) ).then(
+            function (name) {
+              packet['name'] = name
+              $.when( get_vm_guestid(robot, username, home) ).then(
+                function (guestid) {
+                  packet['guestid'] = guestid
+                  robot.send {room: username}, "Making a #{packet['guestid']}
+                                              vm named #{packet['name']}
+                                              with #{packet['mem']}
+                                              megabytes of memory and #{packet['cpus']} CPUs"
+                  url = data['url'] + "vms/"
+                  send_api_packet(robot, username, home, packet, url)
+                });
+            });
+        });
+    });
 
 module.exports = (robot) ->
 
@@ -155,7 +168,7 @@ module.exports = (robot) ->
   robot.respond /(create me vm)/i, (msg) ->
     robot.send {room: msg.envelope.user.name}, "Lets do it!"
     packet = {datastore:"scaleio_vmw", vm_version:"vmx-10", user:"#{msg.envelope.user.name}"}
-    create_vm(robot, msg.envelope.user.name, msg.envelope.room, 1, packet)
+    create_vm(robot, msg.envelope.user.name, msg.envelope.room, packet)
 
   #TODO show what the current changable specs are before asking what to change
   robot.respond /(change vm) (.*)/i, (msg) ->

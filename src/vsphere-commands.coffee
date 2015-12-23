@@ -101,16 +101,16 @@ send_api_packet = (robot, username, home, packet, url) ->
 # Contains all function calls that are needed to create a vm
 create_vm = (robot, username, home, packet) ->
   $.when( get_mem(robot, username, home) ).then (
-    function (memory) {
+    (memory) ->
       packet['mem'] = memory
       $.when( get_cpus(robot, username, home) ).then(
-        function (cpu) {
+        (cpu) ->
           packet['cpus'] = cpu
           $.when( get_vm_name(robot, username, home) ).then(
-            function (name) {
+            (name) ->
               packet['name'] = name
               $.when( get_vm_guestid(robot, username, home) ).then(
-                function (guestid) {
+                (guestid) ->
                   packet['guestid'] = guestid
                   robot.send {room: username}, "Making a #{packet['guestid']}
                                               vm named #{packet['name']}
@@ -118,10 +118,10 @@ create_vm = (robot, username, home, packet) ->
                                               megabytes of memory and #{packet['cpus']} CPUs"
                   url = data['url'] + "vms/"
                   send_api_packet(robot, username, home, packet, url)
-                });
-            });
-        });
-    });
+                )
+            )
+        )
+    )
 
 module.exports = (robot) ->
 

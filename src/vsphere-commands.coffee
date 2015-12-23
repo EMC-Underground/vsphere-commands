@@ -33,34 +33,52 @@ fs.readFile './v-config.json', (err, contents) ->
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 authToken = ""
 
-get_cpus = (robot, username, packet) ->
+responses =
+  first: 'sweet'
+  second: 'cool'
+  third: 'awesome'
+  fourth: 'fair enough'
+  fifth: 'sounds good'
+  sixth: 'ok'
+  seventh: 'affimative'
+  eighth: 'roger that'
+  ninth: 'got it'
+  tenth: 'perfect'
+
+get_cpus = (robot, username, home, packet, creating) ->
   # Get data from user
   robot.send {room: username}, "Now how many cpus? (Format: cpus <num>)"
   robot.respond /(cpus) (.*)/i, (cpuMSG) ->
     cpu = cpuMSG.match[2]
     # Add to packet
     packet['cpus'] = cpu
-    return
+    cpuMSG.send responses[Math.floor(Math.random()* responses.length)]
+    if creating
+      create_vm(robot, username, home, 3, packet)
 
-get_mem = (robot, username, packet) ->
+get_mem = (robot, username, home, packet, creating) ->
   # Get data from user
   robot.send {room: username}, "First, how much memory in megabytes?(Format: mem <num>)"
   robot.respond /(mem) (.*)/i, (memMSG) ->
     memory = memMSG.match[2]
     # Add to packet
     packet['mem'] = memory
-    return
+    memMSG.send responses[Math.floor(Math.random()* responses.length)]
+    if creating
+      create_vm(robot, username, home, 2, packet)
 
-get_vm_name = (robot, username, packet) ->
+get_vm_name = (robot, username, home, packet, creating) ->
   # Get data from user
   robot.send {room: username}, "What would you like to call it? (Please no spaces; format: name <name>)"
   robot.respond /(name) (.*)/i, (nameMSG) ->
     name = nameMSG.match[2]
     # Add to packet
     packet['name'] = name
-    return
+    nameMSG.send responses[Math.floor(Math.random()* responses.length)]
+    if creating
+      create_vm(robot, username, home, 4, packet)
 
-get_vm_guestid = (robot, username, packet) ->
+get_vm_guestid = (robot, username, home, packet, creating) ->
   # Get data from user
   robot.send {room: username}, "One more thing...what's the os? Sadly we can only do Ubuntu so far, so please type: os ubuntu"
   robot.respond /(os) (.*)/i, (guestMSG) ->
@@ -71,11 +89,13 @@ get_vm_guestid = (robot, username, packet) ->
       guestid = "ubuntu64Guest"
     # Add to packet
     packet['guestid'] = guestid
-    return
+    guestMSG.send responses[Math.floor(Math.random()* responses.length)]
+    if creating
+      create_vm(robot, username, home, 5, packet)
 
-send_api_packet = (robot, username, room, packet) ->
-  #
-  robot.http(data['url'] + "vms/")
+send_api_packet = (robot, username, home, packet, url) ->
+  # Send a packet to the api
+  robot.http(url)
     .header('Content-Type', 'application/json')
     .post(JSON.stringify(packet)) (err, res, body) ->
       if err
@@ -83,26 +103,22 @@ send_api_packet = (robot, username, room, packet) ->
         robot.send {room: username}, "Encountered an error: #{err}"
       else
         robot.send {room: username}, "#{body}"
-        robot.send {room: room}, "I have created a vm with this payload #{JSON.stringify(packet, null, 2)}"
-  return
+        robot.send {room: home}, "I have created a vm with this payload #{JSON.stringify(packet, null, 2)}"
 
 # Contains all function calls that are needed to create a vm
-create_vm = (robot, username, room, count, packet) ->
-  while count < 6
-    switch count
-      when 1 then get_mem(robot, username, packet)
-      when 2 then get_cpus(robot, username, packet)
-      when 3 then get_vm_name(robot, username, packet)
-      when 4 then get_vm_guestid(robot, username, packet)
-      when 5
-        robot.send {room: username}, "Making a #{packet['guestid']}
-                                      vm named #{packet['name']}
-                                      with #{packet['mem']}
-                                      megabytes of memory and #{packet['cpus']} CPUs"
-
-        send_api_packet(robot, username, room, packet)
-    count = count + 1
-  return
+create_vm = (robot, username, home, count, packet) ->
+  switch count
+    when 1 then get_mem(robot, username, home, packet, true)
+    when 2 then get_cpus(robot, username, home, packet, true)
+    when 3 then get_vm_name(robot, username, home, packet, true)
+    when 4 then get_vm_guestid(robot, username, home, packet, true)
+    when 5
+      robot.send {room: username}, "Making a #{packet['guestid']}
+                                    vm named #{packet['name']}
+                                    with #{packet['mem']}
+                                    megabytes of memory and #{packet['cpus']} CPUs"
+      url = data['url'] + "vms/"
+      send_api_packet(robot, username, home, packet, url)
 
 module.exports = (robot) ->
 
@@ -149,7 +165,7 @@ module.exports = (robot) ->
   robot.respond /(create me vm)/i, (msg) ->
     robot.send {room: msg.envelope.user.name}, "Lets do it!"
     packet = {datastore:"scaleio_vmw", vm_version:"vmx-10", user:"#{msg.envelope.user.name}"}
-    create_vm(robot, msg.envelope.user.name, msg.envelope.room, 0, packet)
+    create_vm(robot, msg.envelope.user.name, msg.envelope.room, 1, packet)
 
   #TODO show what the current changable specs are before asking what to change
   robot.respond /(change vm) (.*)/i, (msg) ->

@@ -33,17 +33,7 @@ fs.readFile './v-config.json', (err, contents) ->
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = "0"
 authToken = ""
 
-responses =
-  first: 'sweet'
-  second: 'cool'
-  third: 'awesome'
-  fourth: 'fair enough'
-  fifth: 'sounds good'
-  sixth: 'ok'
-  seventh: 'affimative'
-  eighth: 'roger that'
-  ninth: 'got it'
-  tenth: 'perfect'
+responses = ["sweet", "cool", "awesome", "fair enough"," sounds good", "ok", "fantastic", "roger that", "got it", "perfect"]
 
 get_cpus = (robot, username, home, packet, creating) ->
   # Get data from user

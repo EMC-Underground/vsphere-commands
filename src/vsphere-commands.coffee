@@ -40,7 +40,7 @@ responses = ["sweet", "cool", "awesome", "fair enough"," sounds good", "ok",
 get_cpus = (robot, username, home) ->
   # Get data from user
   robot.send {room: username}, "Now how many cpus? (Format: cpus <num>)"
-  var deferred_cpus = $.Deferred();
+  deferred_cpus = $.Deferred();
   robot.respond /(cpus) (.*)/i, (cpuMSG) ->
     cpu = cpuMSG.match[2]
     # Add to packet
@@ -51,7 +51,7 @@ get_cpus = (robot, username, home) ->
 get_mem = (robot, username, home) ->
   # Get data from user
   robot.send {room: username}, "First, how much memory in megabytes?(Format: mem <num>)"
-  var deferred_mem = $.Deferred();
+  deferred_mem = $.Deferred();
   robot.respond /(mem) (.*)/i, (memMSG) ->
     memory = memMSG.match[2]
     # Add to packet
@@ -62,7 +62,7 @@ get_mem = (robot, username, home) ->
 get_vm_name = (robot, username, home, packet, creating) ->
   # Get data from user
   robot.send {room: username}, "What would you like to call it? (Please no spaces; format: name <name>)"
-  var deferred_name = $.Deferred();
+  deferred_name = $.Deferred();
   robot.respond /(name) (.*)/i, (nameMSG) ->
     name = nameMSG.match[2]
     # Add to packet
@@ -74,7 +74,7 @@ get_vm_guestid = (robot, username, home) ->
   # Get data from user
   robot.send {room: username}, "One more thing...what's the os?
                                 Sadly we can only do Ubuntu so far, so please type: os ubuntu"
-  var deferred_guestid = $.Deferred();
+  deferred_guestid = $.Deferred();
   robot.respond /(os) (.*)/i, (guestMSG) ->
     guestid = guestMSG.match[2]
     if guestid == "ubuntu"

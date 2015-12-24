@@ -96,21 +96,18 @@
       robot.respond(/(mem) (.*)/i, function(memMSG) {
         var memory;
         memory = memMSG.match[2];
-        memMSG.send(responses[Math.floor(Math.random()* responses.length)]);
         robot.send({
           room: msg.envelope.user.name
         }, "Now how many cpus? (Format: cpus <num>)");
         robot.respond(/(cpus) (.*)/i, function(cpuMSG) {
           var cpu;
           cpu = cpuMSG.match[2];
-          cpuMSG.send(responses[Math.floor(Math.random()* responses.length)]);
           robot.send({
             room: msg.envelope.user.name
           }, "What would you like to call it? (Please no spaces; format: name <name>)");
           robot.respond(/(name) (.*)/i, function(nameMSG) {
             var name;
             name = nameMSG.match[2];
-            nameMSG.send(responses[Math.floor(Math.random()* responses.length)]);
             robot.send({
               room: msg.envelope.user.name
             }, "One more thing...what's the os? Sadly we can only do Ubuntu so far, so please type: os ubuntu");
@@ -122,7 +119,6 @@
               } else {
                 guestid = "ubuntu64Guest";
               }
-              guestMSG.send(responses[Math.floor(Math.random()* responses.length)]);
               robot.send({
                 room: msg.envelope.user.name
               }, "Making a " + guestid + " vm named " + name + " with " + memory + " megabytes of memory and " + cpu + " CPUs");
@@ -148,15 +144,15 @@
                   return msg.send("I have created a vm with this payload " + (JSON.stringify(payload, null, 2)));
                 }
               });
-              return
+              return guestMSG.send(responses[Math.floor(Math.random()* responses.length)]);
             });
-            return
+            return nameMSG.send(responses[Math.floor(Math.random()* responses.length)]);
           });
-          return
+          return cpuMSG.send(responses[Math.floor(Math.random()* responses.length)]);
         });
-        return
+        return memMSG.send(responses[Math.floor(Math.random()* responses.length)]);
       });
-      return
+      return msg.send("...and then?")
     });
 
     robot.respond(/(change vm) (.*)/i, function(msg) {

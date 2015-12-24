@@ -131,7 +131,7 @@
                 vm_version: "vmx-10",
                 user: "" + msg.envelope.user.name
               };
-              return robot.http(data['url'] + "vms/").header('Content-Type', 'application/json').post(JSON.stringify(payload))(function(err, res, body) {
+              robot.http(data['url'] + "vms/").header('Content-Type', 'application/json').post(JSON.stringify(payload))(function(err, res, body) {
                 if (err) {
                   robot.logger.info("Encountered an error: " + err);
                   robot.send({

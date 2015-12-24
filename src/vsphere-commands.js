@@ -92,16 +92,16 @@
     robot.respond(/(create me vm)/i, function(msg) {
       robot.send({
         room: msg.envelope.user.name
-      }, "Lets do it! First, how much memory in megabytes?(Format: <num> mem)");
-      robot.respond(/(.*) (mem)/i, function(memMSG) {
+      }, "Lets do it! First, how much memory in megabytes?(Format: mem <num>)");
+      robot.respond(/(mem) (.*)/i, function(memMSG) {
         var memory;
-        memory = memMSG.match[1];
+        memory = memMSG.match[2];
         robot.send({
           room: msg.envelope.user.name
-        }, "Now how many cpus? (Format: <num> cpus)");
-        robot.respond(/(.*) (cpus)/i, function(cpuMSG) {
+        }, "Now how many cpus? (Format: cpus <num>)");
+        robot.respond(/(cpus) (.*)/i, function(cpuMSG) {
           var cpu;
-          cpu = cpuMSG.match[1];
+          cpu = cpuMSG.match[2];
           robot.send({
             room: msg.envelope.user.name
           }, "What would you like to call it? (Please no spaces; format: name <name>)");
@@ -119,6 +119,7 @@
               } else {
                 guestid = "ubuntu64Guest";
               }
+              guestMSG.send responses[Math.floor(Math.random()* responses.length)]
               robot.send({
                 room: msg.envelope.user.name
               }, "Making a " + guestid + " vm named " + name + " with " + memory + " megabytes of memory and " + cpu + " CPUs");
@@ -144,10 +145,15 @@
                   return msg.send("I have created a vm with this payload " + (JSON.stringify(payload, null, 2)));
                 }
               });
+              return
             });
+            return
           });
+          return
         });
+        return
       });
+      return
     });
 
     robot.respond(/(change vm) (.*)/i, function(msg) {

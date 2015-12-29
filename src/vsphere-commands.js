@@ -56,12 +56,6 @@
       var response = {'key': '', 'question': '', 'answer': ''};
       response.key = single.dataname;
       response.question = single.question;
-      this.robot.respond(single.regex, function(msg){
-        _this.robot.logger.info("This callback has: " + i);
-        _this.responses[i].answer = msg.match[2];
-        msg.send(_this.salutations[Math.floor(Math.random()* responses.length)]);
-        _this.askQuestion(i+1);
-      });
       var index = this.robot.listeners.length - 1;
       this.responses.push(response);
       this.responders[single.regex] = index;
@@ -84,6 +78,12 @@
     }
     else{
       this.msg.send({room: this.user.name}, "" + this.responses[num].question);
+      this.robot.respond(this.questions[num].regex, function(msg){
+        _this.robot.logger.info("This callback has: " + num);
+        _this.responses[num].answer = msg.match[2];
+        _this.msg.send(_this.salutations[Math.floor(Math.random()* responses.length)]);
+        _this.askQuestion(i+1);
+      });
     }
   };
 

@@ -188,19 +188,19 @@
       var questions = [{
         'question': 'How much memory in megabytes?(Format: mem <num>)',
         'dataname': 'mem',
-        'regex': '/(memory|mem)(/\s/\d)(.*)?/i'
+        'regex': /(memory|mem)(/\s/\d)(.*)?/i
       }, {
         'question': 'Now how many cpus? (Format: cpus <num>)',
         'dataname': 'cpus',
-        'regex': '/(cpus) (.*)/i'
+        'regex': /(cpus) (.*)/i
       }, {
         'question': 'What would you like to call it? (Please no spaces; format: name <name>)',
         'dataname': 'name',
-        'regex': '/(name) (.*)/i'
+        'regex': /(name) (.*)/i
       }, {
         'question': 'One more thing...what is the os? Sadly we can only do Ubuntu so far, so please type: os ubuntu',
         'dataname': 'guestid',
-        'regex': '/(os) (.*)/i'
+        'regex': /(os) (.*)/i
       }];
       var createVMPacket = new PacketBuilder(robot, msg, questions, data.url + "vms/");
       createVMPacket.askQuestion(0);

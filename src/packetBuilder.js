@@ -26,7 +26,7 @@ var PacketBuilder = function(msg, questions, url){
   }
 };
 // Clean up the used responders
-PacketBuilder.prototype.cleanUp(){
+PacketBuilder.prototype.cleanUp = function(){
   for(var i = this.questions.length; i >= 0; i--){
     var index = this.responders[questions[i].regex];
     this.msg.listeners.splice(index, 1, function(){});
@@ -35,7 +35,7 @@ PacketBuilder.prototype.cleanUp(){
 };
 
 // Spin up the next question
-PacketBuilder.prototype.askQuestion(num){
+PacketBuilder.prototype.askQuestion = function(num){
   // If the num is equal to the length, time to send the packet!
   if (num >= this.questions.length){
     sendPacket();
@@ -45,7 +45,7 @@ PacketBuilder.prototype.askQuestion(num){
   }
 };
 
-PacketBuilder.prototype.sendPacket(){
+PacketBuilder.prototype.sendPacket = function(){
   this.msg.send({
     room: this.msg.envelope.user.name
   }, "Making a " + guestid + " vm named " + name + " with " + memory + " megabytes of memory and " + cpu + " CPUs");

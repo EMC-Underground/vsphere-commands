@@ -82,7 +82,7 @@
         _this.robot.logger.info("This callback has: " + num);
         _this.responses[num].answer = msg.match[2];
         _this.msg.send(_this.salutations[Math.floor(Math.random()* responses.length)]);
-        _this.askQuestion(i+1);
+        _this.askQuestion(num+1);
       });
     }
   };

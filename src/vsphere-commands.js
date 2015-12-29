@@ -84,8 +84,10 @@
       this.robot.send({
         room: this.user.name
       }, "" + this.responses[num].question);
+      _this.robot.logger.info('registering ' + this.questions[num].regex +
+        ' for the callback to question' + num);
       this.robot.respond(this.questions[num].regex, function(msg) {
-        _this.robot.logger.info("This callback has: " + num);
+        _this.robot.logger.info("response captured: " + msg);
         _this.responses[num].answer = msg.match[2];
         _this.robot.send({
             room: _this.user.name

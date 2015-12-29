@@ -54,7 +54,7 @@
       var response = {'key': '', 'question': '', 'answer': ''};
       response.key = single.dataname;
       response.question = single.question;
-      msg.respond(single.regex, function(msg, i, _this){
+      msg.respond(single.regex, function(msg){
         _this.responses[i].answer = msg.match[2];
         msg.send(_this.salutations[Math.floor(Math.random()* responses.length)]);
         _this.askQuestion(i+1);

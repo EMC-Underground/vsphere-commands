@@ -39,7 +39,8 @@
 
   authToken = "";
 
-  var PacketBuilder = function(msg, questions, url){
+  var PacketBuilder = function(robot, msg, questions, url){
+    this.robot = robot;
     this.msg = msg;
     this.user = this.msg.message.user;
     this.room = this.msg.message.room;
@@ -54,12 +55,12 @@
       var response = {'key': '', 'question': '', 'answer': ''};
       response.key = single.dataname;
       response.question = single.question;
-      msg.respond(single.regex, function(msg){
+      this.robot.respond(single.regex, function(msg){
         _this.responses[i].answer = msg.match[2];
         msg.send(_this.salutations[Math.floor(Math.random()* responses.length)]);
         _this.askQuestion(i+1);
       });
-      var index = this.msg.listeners.length - 1;
+      var index = this.robot.listeners.length - 1;
       this.responses.push(response);
       this.responders[single.regex] = index;
     }
@@ -68,7 +69,7 @@
   PacketBuilder.prototype.cleanUp = function(){
     for(var i = this.questions.length; i >= 0; i--){
       var index = this.responders[questions[i].regex];
-      this.msg.listeners.splice(index, 1, function(){});
+      this.robots.listeners.splice(index, 1, function(){});
       delete this.responders[questions[i].regex];
     }
   };
@@ -183,7 +184,7 @@
          'regex': '/(os) (.*)/i'
        }
       ]
-      var createVMPacket = new PacketBuilder(msg, questions, data['url'] + "vms/");
+      var createVMPacket = new PacketBuilder(robot, msg, questions, data['url'] + "vms/");
       createVMPacket.askQuestion(0);
       return;
     });

@@ -56,6 +56,7 @@
       response.key = single.dataname;
       response.question = single.question;
       this.robot.respond(single.regex, function(msg){
+        robot.logger.info(i)
         _this.responses[i].answer = msg.match[2];
         msg.send(_this.salutations[Math.floor(Math.random()* responses.length)]);
         _this.askQuestion(i+1);
@@ -98,9 +99,9 @@
       vm_version: "vmx-10",
       user: "" + this.msg.envelope.user.name
     };
-    this.msg.http(this.url).header('Content-Type', 'application/json').post(JSON.stringify(payload))(function(err, res, body) {
+    this.robot.http(this.url).header('Content-Type', 'application/json').post(JSON.stringify(payload))(function(err, res, body) {
       if (err) {
-        this.msg.logger.info("Encountered an error: " + err);
+        this.robot.logger.info("Encountered an error: " + err);
         this.msg.send({
           room: this.msg.envelope.user.name
         }, "Encountered an error: " + err);
@@ -108,7 +109,7 @@
         this.msg.send({
           room: this.msg.envelope.user.name
         }, "" + body);
-        msg.send({room: this.room}, "I have created a vm with this payload " + (JSON.stringify(payload, null, 2)));
+        this.msg.send({room: this.room}, "I have created a vm with this payload " + (JSON.stringify(payload, null, 2)));
       }
     });
     cleanUp();

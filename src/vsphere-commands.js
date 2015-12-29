@@ -66,11 +66,12 @@
     }
   };
   // Clean up the used responders
-  PacketBuilder.prototype.cleanUp = function() {
-    for (var i = this.questions.length; i >= 0; i--) {
-      var index = this.responders[questions[i].regex];
-      this.robots.listeners.splice(index, 1, function() {});
-      delete this.responders[questions[i].regex];
+  PacketBuilder.prototype.cleanUp = function(_this) {
+    _this = _this || this;
+    for (var i = _this.questions.length; i >= 0; i--) {
+      var index = _this.responders[questions[i].regex];
+      _this.robots.listeners.splice(index, 1, function() {});
+      delete _this.responders[questions[i].regex];
     }
   };
 
@@ -79,7 +80,7 @@
     // If the num is equal to the length, time to send the packet!
     _this = _this || this;
     if (num >= _this.questions.length) {
-      _this.sendPacket();
+      _this.sendPacket(_this);
     } else {
       _this.robot.send({
         room: _this.user.name
@@ -100,38 +101,45 @@
     }
   };
 
-  PacketBuilder.prototype.sendPacket = function() {
+  PacketBuilder.prototype.sendPacket = function(_this) {
+    _this = _this || this;
+    _this.robot.logger.info(_this.user.name);
     payload = {
       datastore: "scaleio_vmw",
       vm_version: "vmx-10",
-      user: "" + this.msg.envelope.user.name
+      user: "" + _this.user.name
     };
-    for (var i = 0; i < responses.length; i++) {
-      payload[responses[i].key] = this.responses[i]['answer'];
-      this.robot.logger.info(this.responses[i]['answer']);
+    _this.robot.logger.info(_this.responses.length);
+    for (var i = 0; i < _this.responses.length; i++) {
+      payload[responses[i].key] = _this.responses[i]['answer'];
+      _this.robot.logger.info(_this.responses[i]['answer']);
     }
-    this.msg.send({
-        room: this.msg.envelope.user.name
+    _this.robot.logger.info("Sending info to slack");
+    _this.robot.send({
+        room: _this.user.name
       }, "Making a " + payload.guestid +
       " vm named " + payload.name +
       " with " + payload.mem +
       " megabytes of memory and " + payload.cpus + " CPUs");
-    this.robot.http(this.url).header('Content-Type', 'application/json').post(JSON.stringify(payload))(function(err, res, body) {
+    _this.robot.logger.info("Sending packet...");
+    _this.robot.http(_this.url)
+      .header('Content-Type', 'application/json')
+      .post(JSON.stringify(payload))(function(err, res, body) {
       if (err) {
-        this.robot.logger.info("Encountered an error: " + err);
-        this.msg.send({
-          room: this.msg.envelope.user.name
+        _this.robot.logger.info("Encountered an error: " + err);
+        _this.robot.send({
+          room: _this.msg.envelope.user.name
         }, "Encountered an error: " + err);
       } else {
-        this.msg.send({
-          room: this.msg.envelope.user.name
+        _this.robot.send({
+          room: _this.user.name
         }, "" + body);
-        this.msg.send({
-          room: this.room
+        _this.robot.send({
+          room: _this.room
         }, "I have created a vm with this payload " + (JSON.stringify(payload, null, 2)));
       }
     });
-    cleanUp();
+    cleanUp(_this);
   };
 
   module.exports = function(robot) {
@@ -189,7 +197,7 @@
       var questions = [{
         'question': 'How much memory in megabytes?(Format: mem <num>)',
         'dataname': 'mem',
-        'regex': /(memory|mem)(\s\d)(.*)?/i
+        'regex': /(memory\s|mem\s)(\d{1,4})(.*)?/i
       }, {
         'question': 'Now how many cpus? (Format: cpus <num>)',
         'dataname': 'cpus',

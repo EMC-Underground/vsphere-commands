@@ -51,12 +51,13 @@
     this.responses = [];
     _this = this;
     for(var i = 0; i < this.questions.length; i++){
+      this.robot.logger.info("We're at index " + i);
       var single = this.questions[i];
       var response = {'key': '', 'question': '', 'answer': ''};
       response.key = single.dataname;
       response.question = single.question;
       this.robot.respond(single.regex, function(msg){
-        robot.logger.info(i)
+        _this.robot.logger.info("This callback has: " + i);
         _this.responses[i].answer = msg.match[2];
         msg.send(_this.salutations[Math.floor(Math.random()* responses.length)]);
         _this.askQuestion(i+1);

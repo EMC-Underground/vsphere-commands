@@ -188,7 +188,7 @@
       var questions = [{
         'question': 'How much memory in megabytes?(Format: mem <num>)',
         'dataname': 'mem',
-        'regex': '(memory|mem)(\s\d)(.*)?'
+        'regex': '/(memory|mem)(\s\d)(.*)?/i'
       }, {
         'question': 'Now how many cpus? (Format: cpus <num>)',
         'dataname': 'cpus',

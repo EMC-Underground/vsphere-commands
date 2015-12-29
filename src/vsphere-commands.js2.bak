@@ -26,8 +26,6 @@
   http = require('http');
   data = {};
 
-  var Conversation = require('hubot-conversation');
-
   fs.readFile('./v-config.json', function(err, contents) {
     if (err) {
       return console.log("Encountered an error: " + err);
@@ -41,10 +39,87 @@
 
   authToken = "";
 
+  var PacketBuilder = function(robot, msg, questions, url){
+    this.robot = robot;
+    this.msg = msg;
+    this.user = this.msg.message.user;
+    this.room = this.msg.message.room;
+    this.questions = questions;
+    this.responders = {};
+    this.salutations = ["sweet", "cool", "awesome", "fair enough"," sounds good", "ok",
+                      "fantastic", "roger that", "got it", "perfect"]
+    this.responses = [];
+    for(var i = 0; i < this.questions.length; i++){
+      this.robot.logger.info("We're at index " + i);
+      var single = this.questions[i];
+      var response = {'key': '', 'question': '', 'answer': ''};
+      response.key = single.dataname;
+      response.question = single.question;
+      this.responses.push(response);
+    }
+  };
+  // Clean up the used responders
+  PacketBuilder.prototype.cleanUp = function(){
+    for(var i = this.questions.length; i >= 0; i--){
+      var index = this.responders[questions[i].regex];
+      this.robots.listeners.splice(index, 1, function(){});
+      delete this.responders[questions[i].regex];
+    }
+  };
+
+  // Spin up the next question
+  PacketBuilder.prototype.askQuestion = function(num){
+    // If the num is equal to the length, time to send the packet!
+    if (num >= this.questions.length){
+      this.sendPacket();
+    }
+    else{
+      _this = this;
+      this.robot.send({room: this.user.name}, "" + this.responses[num].question);
+      this.robot.respond(this.questions[num].regex, function(msg){
+        _this.robot.logger.info("This callback has: " + num);
+        _this.responses[num].answer = msg.match[2];
+        _this.robot.send({room: _this.user.name},
+                          _this.salutations[Math.floor(Math.random()* responses.length)]);
+        askQuestion(num+1);
+      });
+      var index = this.robot.listeners.length - 1;
+      this.responders[this.questions[num].regex] = index;
+    }
+  };
+
+  PacketBuilder.prototype.sendPacket = function(){
+    payload = {
+      datastore: "scaleio_vmw",
+      vm_version: "vmx-10",
+      user: "" + this.msg.envelope.user.name
+    };
+    for(var i = 0; i < responses.length; i++){
+      payload[responses[i].key]=responses[i].answer;
+    }
+    this.msg.send({
+      room: this.msg.envelope.user.name
+    }, "Making a " + payload['guestid'] +
+        " vm named " + payload['name'] +
+        " with " + payload['mem'] +
+        " megabytes of memory and " + payload['cpus'] + " CPUs");
+    this.robot.http(this.url).header('Content-Type', 'application/json').post(JSON.stringify(payload))(function(err, res, body) {
+      if (err) {
+        this.robot.logger.info("Encountered an error: " + err);
+        this.msg.send({
+          room: this.msg.envelope.user.name
+        }, "Encountered an error: " + err);
+      } else {
+        this.msg.send({
+          room: this.msg.envelope.user.name
+        }, "" + body);
+        this.msg.send({room: this.room}, "I have created a vm with this payload " + (JSON.stringify(payload, null, 2)));
+      }
+    });
+    cleanUp();
+  };
+
   module.exports = function(robot) {
-
-    var switchBoard = new Conversation(robot);
-
     robot.respond(/(list all vms)/i, function(msg) {
       return robot.http(data['url'] + "vms/").get()(function(err, res, body) {
         var all_vms, i, j, len, vm, vms;
@@ -95,67 +170,27 @@
     robot.respond(/(create me vm)/i, function(msg) {
       robot.send({
         room: msg.envelope.user.name
-      }, "Lets do it! First, how much memory in megabytes?(Format: mem <num>)");
-      robot.respond(/(mem) (.*)/i, function(memMSG) {
-        var memory;
-        memory = memMSG.match[2];
-        robot.send({
-          room: msg.envelope.user.name
-        }, "Now how many cpus? (Format: cpus <num>)");
-        robot.respond(/(cpus) (.*)/i, function(cpuMSG) {
-          var cpu;
-          cpu = cpuMSG.match[2];
-          robot.send({
-            room: msg.envelope.user.name
-          }, "What would you like to call it? (Please no spaces; format: name <name>)");
-          robot.respond(/(name) (.*)/i, function(nameMSG) {
-            var name;
-            name = nameMSG.match[2];
-            robot.send({
-              room: msg.envelope.user.name
-            }, "One more thing...what's the os? Sadly we can only do Ubuntu so far, so please type: os ubuntu");
-            robot.respond(/(os) (.*)/i, function(guestMSG) {
-              var guestid, payload;
-              guestid = guestMSG.match[2];
-              if (guestid === "ubuntu") {
-                guestid = "ubuntu64Guest";
-              } else {
-                guestid = "ubuntu64Guest";
-              }
-              robot.send({
-                room: msg.envelope.user.name
-              }, "Making a " + guestid + " vm named " + name + " with " + memory + " megabytes of memory and " + cpu + " CPUs");
-              payload = {
-                datastore: "scaleio_vmw",
-                mem: "" + memory,
-                cpus: "" + cpu,
-                name: "" + name,
-                guestid: "" + guestid,
-                vm_version: "vmx-10",
-                user: "" + msg.envelope.user.name
-              };
-              robot.http(data['url'] + "vms/").header('Content-Type', 'application/json').post(JSON.stringify(payload))(function(err, res, body) {
-                if (err) {
-                  robot.logger.info("Encountered an error: " + err);
-                  robot.send({
-                    room: msg.envelope.user.name
-                  }, "Encountered an error: " + err);
-                } else {
-                  robot.send({
-                    room: msg.envelope.user.name
-                  }, "" + body);
-                  return msg.send("I have created a vm with this payload " + (JSON.stringify(payload, null, 2)));
-                }
-              });
-              return guestMSG.send(responses[Math.floor(Math.random()* responses.length)]);
-            });
-            return nameMSG.send(responses[Math.floor(Math.random()* responses.length)]);
-          });
-          return cpuMSG.send(responses[Math.floor(Math.random()* responses.length)]);
-        });
-        return memMSG.send(responses[Math.floor(Math.random()* responses.length)]);
-      });
-      return msg.send("...and then?")
+      }, "Lets do it!");
+      var questions = [
+        {'question': 'How much memory in megabytes?(Format: mem <num>)',
+          'dataname': 'mem',
+          'regex':'(memory|mem)(\s\d)(.*)?'
+        },
+        {'question': 'Now how many cpus? (Format: cpus <num>)',
+          'dataname': 'cpus',
+          'regex': '/(cpus) (.*)/i'
+        },
+        {'question': 'What would you like to call it? (Please no spaces; format: name <name>)',
+          'dataname': 'name',
+          'regex': '/(name) (.*)/i'
+        },
+        {'question': 'One more thing...what is the os? Sadly we can only do Ubuntu so far, so please type: os ubuntu',
+         'dataname': 'guestid',
+         'regex': '/(os) (.*)/i'
+       }
+      ]
+      var createVMPacket = new PacketBuilder(robot, msg, questions, data['url'] + "vms/");
+      createVMPacket.askQuestion(0);
     });
 
     robot.respond(/(change vm) (.*)/i, function(msg) {

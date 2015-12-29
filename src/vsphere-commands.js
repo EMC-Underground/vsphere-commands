@@ -77,7 +77,7 @@
       sendPacket();
     }
     else{
-      this.msg.send({room: this.user.name}, "" + this.responses[num].question);
+      this.robot.send({room: this.user.name}, "" + this.responses[num].question);
       this.robot.respond(this.questions[num].regex, function(msg){
         _this.robot.logger.info("This callback has: " + num);
         _this.responses[num].answer = msg.match[2];

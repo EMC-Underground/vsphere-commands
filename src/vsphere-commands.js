@@ -91,7 +91,7 @@
             room: _this.user.name
           },
           _this.salutations[Math.floor(Math.random() * responses.length)]);
-        askQuestion(num + 1);
+        _this.askQuestion(num + 1);
       });
       var index = this.robot.listeners.length - 1;
       this.responders[this.questions[num].regex] = index;

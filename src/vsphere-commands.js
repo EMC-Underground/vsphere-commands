@@ -74,14 +74,15 @@
   PacketBuilder.prototype.askQuestion = function(num){
     // If the num is equal to the length, time to send the packet!
     if (num >= this.questions.length){
-      sendPacket();
+      this.sendPacket();
     }
     else{
       this.robot.send({room: this.user.name}, "" + this.responses[num].question);
       this.robot.respond(this.questions[num].regex, function(msg){
         _this.robot.logger.info("This callback has: " + num);
         _this.responses[num].answer = msg.match[2];
-        _this.msg.send(_this.salutations[Math.floor(Math.random()* responses.length)]);
+        _this.robot.send({room: _this.user.name},
+                          _this.salutations[Math.floor(Math.random()* responses.length)]);
         _this.askQuestion(num+1);
       });
     }

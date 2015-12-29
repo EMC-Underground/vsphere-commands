@@ -49,18 +49,14 @@
     this.salutations = ["sweet", "cool", "awesome", "fair enough"," sounds good", "ok",
                       "fantastic", "roger that", "got it", "perfect"]
     this.responses = [];
-    _this = this;
     for(var i = 0; i < this.questions.length; i++){
       this.robot.logger.info("We're at index " + i);
       var single = this.questions[i];
       var response = {'key': '', 'question': '', 'answer': ''};
       response.key = single.dataname;
       response.question = single.question;
-      var index = this.robot.listeners.length - 1;
       this.responses.push(response);
-      this.responders[single.regex] = index;
     }
-    this.askQuestion(0)
   };
   // Clean up the used responders
   PacketBuilder.prototype.cleanUp = function(){
@@ -78,14 +74,17 @@
       this.sendPacket();
     }
     else{
+      _this = this;
       this.robot.send({room: this.user.name}, "" + this.responses[num].question);
       this.robot.respond(this.questions[num].regex, function(msg){
         _this.robot.logger.info("This callback has: " + num);
         _this.responses[num].answer = msg.match[2];
         _this.robot.send({room: _this.user.name},
                           _this.salutations[Math.floor(Math.random()* responses.length)]);
-        _this.askQuestion(num+1);
+        askQuestion(num+1);
       });
+      var index = this.robot.listeners.length - 1;
+      this.responders[this.questions[num].regex] = index;
     }
   };
 
@@ -191,7 +190,7 @@
        }
       ]
       var createVMPacket = new PacketBuilder(robot, msg, questions, data['url'] + "vms/");
-      return;
+      createVMPacket.askQuestion(0);
     });
 
     robot.respond(/(change vm) (.*)/i, function(msg) {

@@ -59,6 +59,7 @@
       var index = this.robot.listeners.length - 1;
       this.responses.push(response);
       this.responders[single.regex] = index;
+      this.askQuestion(0)
     }
   };
   // Clean up the used responders
@@ -89,18 +90,20 @@
   };
 
   PacketBuilder.prototype.sendPacket = function(){
-    this.msg.send({
-      room: this.msg.envelope.user.name
-    }, "Making a " + guestid + " vm named " + name + " with " + memory + " megabytes of memory and " + cpu + " CPUs");
     payload = {
       datastore: "scaleio_vmw",
-      mem: "" + memory,
-      cpus: "" + cpu,
-      name: "" + name,
-      guestid: "" + guestid,
       vm_version: "vmx-10",
       user: "" + this.msg.envelope.user.name
     };
+    for(var i = 0; i < responses.length; i++){
+      payload[responses[i].key]=responses[i].answer;
+    }
+    this.msg.send({
+      room: this.msg.envelope.user.name
+    }, "Making a " + payload['guestid'] +
+        " vm named " + payload['name'] +
+        " with " + payload['mem'] + 
+        " megabytes of memory and " + payload['cpus'] + " CPUs");
     this.robot.http(this.url).header('Content-Type', 'application/json').post(JSON.stringify(payload))(function(err, res, body) {
       if (err) {
         this.robot.logger.info("Encountered an error: " + err);
@@ -171,11 +174,11 @@
       }, "Lets do it!");
       var questions = [
         {'question': 'How much memory in megabytes?(Format: mem <num>)',
-          'dataname': 'memory',
+          'dataname': 'mem',
           'regex':'(memory|mem)(\s\d)(.*)?'
         },
         {'question': 'Now how many cpus? (Format: cpus <num>)',
-          'dataname': 'cpu',
+          'dataname': 'cpus',
           'regex': '/(cpus) (.*)/i'
         },
         {'question': 'What would you like to call it? (Please no spaces; format: name <name>)',
@@ -188,7 +191,6 @@
        }
       ]
       var createVMPacket = new PacketBuilder(robot, msg, questions, data['url'] + "vms/");
-      createVMPacket.askQuestion(0);
       return;
     });
 

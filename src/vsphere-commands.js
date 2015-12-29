@@ -75,28 +75,28 @@
   };
 
   // Spin up the next question
-  PacketBuilder.prototype.askQuestion = function(num) {
+  PacketBuilder.prototype.askQuestion = function(num, _this) {
     // If the num is equal to the length, time to send the packet!
-    if (num >= this.questions.length) {
-      this.sendPacket();
+    _this = _this || this;
+    if (num >= _this.questions.length) {
+      _this.sendPacket();
     } else {
-      _this = this;
-      this.robot.send({
-        room: this.user.name
-      }, "" + this.responses[num].question);
-      _this.robot.logger.info('registering ' + this.questions[num].regex +
+      _this.robot.send({
+        room: _this.user.name
+      }, "" + _this.responses[num].question);
+      _this.robot.logger.info('registering ' + _this.questions[num].regex +
         ' for the callback to question' + num);
-      this.robot.respond(this.questions[num].regex, function(msg) {
+      _this.robot.respond(_this.questions[num].regex, function(msg) {
         _this.robot.logger.info("response captured: " + msg);
         _this.responses[num].answer = msg.match[2];
         _this.robot.send({
             room: _this.user.name
           },
           _this.salutations[Math.floor(Math.random() * responses.length)]);
-        _this.askQuestion(num + 1);
+        _this.askQuestion(num + 1, _this);
       });
-      var index = this.robot.listeners.length - 1;
-      this.responders[this.questions[num].regex] = index;
+      var index = _this.robot.listeners.length - 1;
+      _this.responders[_this.questions[num].regex] = index;
     }
   };
 
@@ -107,7 +107,8 @@
       user: "" + this.msg.envelope.user.name
     };
     for (var i = 0; i < responses.length; i++) {
-      payload[responses[i].key] = responses[i].answer;
+      payload[responses[i].key] = this.responses[i]['answer'];
+      this.robot.logger.info(this.responses[i]['answer']);
     }
     this.msg.send({
         room: this.msg.envelope.user.name
@@ -188,7 +189,7 @@
       var questions = [{
         'question': 'How much memory in megabytes?(Format: mem <num>)',
         'dataname': 'mem',
-        'regex': /(memory|mem)(/\s/\d)(.*)?/i
+        'regex': /(memory|mem)(\s\d)(.*)?/i
       }, {
         'question': 'Now how many cpus? (Format: cpus <num>)',
         'dataname': 'cpus',

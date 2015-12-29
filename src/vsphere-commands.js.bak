@@ -23,10 +23,10 @@
   var authToken, data, fs, http;
 
   fs = require('fs');
-  http = require('http');
-  data = {};
 
-  var PacketBuilder = require('./packetBuilder.js');
+  http = require('http');
+
+  data = {};
 
   fs.readFile('./v-config.json', function(err, contents) {
     if (err) {
@@ -92,28 +92,67 @@
     robot.respond(/(create me vm)/i, function(msg) {
       robot.send({
         room: msg.envelope.user.name
-      }, "Lets do it!");
-      var questions =[
-        {'question': 'How much memory in megabytes?(Format: mem <num>)',
-          'dataname': 'memory',
-          'regex':'(memory|mem)(\s\d)(.*)?'
-        },
-        {'question': 'Now how many cpus? (Format: cpus <num>)',
-          'dataname': 'cpu',
-          'regex': '/(cpus) (.*)/i'
-        },
-        {'question': 'What would you like to call it? (Please no spaces; format: name <name>)',
-          'dataname': 'name',
-          'regex': '/(name) (.*)/i'
-        },
-        {'question': 'One more thing...what is the os? Sadly we can only do Ubuntu so far, so please type: os ubuntu',
-         'dataname': 'guestid',
-         'regex': '/(os) (.*)/i'
-       }
-      ]
-      var createVMPacket = new PacketBuilder(msg, questions, data['url'] + "vms/");
-      createVMPacket.askQuestion(0);
-      return;
+      }, "Lets do it! First, how much memory in megabytes?(Format: mem <num>)");
+      robot.respond(/(mem) (.*)/i, function(memMSG) {
+        var memory;
+        memory = memMSG.match[2];
+        robot.send({
+          room: msg.envelope.user.name
+        }, "Now how many cpus? (Format: cpus <num>)");
+        robot.respond(/(cpus) (.*)/i, function(cpuMSG) {
+          var cpu;
+          cpu = cpuMSG.match[2];
+          robot.send({
+            room: msg.envelope.user.name
+          }, "What would you like to call it? (Please no spaces; format: name <name>)");
+          robot.respond(/(name) (.*)/i, function(nameMSG) {
+            var name;
+            name = nameMSG.match[2];
+            robot.send({
+              room: msg.envelope.user.name
+            }, "One more thing...what's the os? Sadly we can only do Ubuntu so far, so please type: os ubuntu");
+            robot.respond(/(os) (.*)/i, function(guestMSG) {
+              var guestid, payload;
+              guestid = guestMSG.match[2];
+              if (guestid === "ubuntu") {
+                guestid = "ubuntu64Guest";
+              } else {
+                guestid = "ubuntu64Guest";
+              }
+              robot.send({
+                room: msg.envelope.user.name
+              }, "Making a " + guestid + " vm named " + name + " with " + memory + " megabytes of memory and " + cpu + " CPUs");
+              payload = {
+                datastore: "scaleio_vmw",
+                mem: "" + memory,
+                cpus: "" + cpu,
+                name: "" + name,
+                guestid: "" + guestid,
+                vm_version: "vmx-10",
+                user: "" + msg.envelope.user.name
+              };
+              robot.http(data['url'] + "vms/").header('Content-Type', 'application/json').post(JSON.stringify(payload))(function(err, res, body) {
+                if (err) {
+                  robot.logger.info("Encountered an error: " + err);
+                  robot.send({
+                    room: msg.envelope.user.name
+                  }, "Encountered an error: " + err);
+                } else {
+                  robot.send({
+                    room: msg.envelope.user.name
+                  }, "" + body);
+                  return msg.send("I have created a vm with this payload " + (JSON.stringify(payload, null, 2)));
+                }
+              });
+              return guestMSG.send(responses[Math.floor(Math.random()* responses.length)]);
+            });
+            return nameMSG.send(responses[Math.floor(Math.random()* responses.length)]);
+          });
+          return cpuMSG.send(responses[Math.floor(Math.random()* responses.length)]);
+        });
+        return memMSG.send(responses[Math.floor(Math.random()* responses.length)]);
+      });
+      return msg.send("...and then?")
     });
 
     robot.respond(/(change vm) (.*)/i, function(msg) {

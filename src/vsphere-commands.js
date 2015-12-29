@@ -59,8 +59,8 @@
       var index = this.robot.listeners.length - 1;
       this.responses.push(response);
       this.responders[single.regex] = index;
-      this.askQuestion(0)
     }
+    this.askQuestion(0)
   };
   // Clean up the used responders
   PacketBuilder.prototype.cleanUp = function(){
@@ -102,7 +102,7 @@
       room: this.msg.envelope.user.name
     }, "Making a " + payload['guestid'] +
         " vm named " + payload['name'] +
-        " with " + payload['mem'] + 
+        " with " + payload['mem'] +
         " megabytes of memory and " + payload['cpus'] + " CPUs");
     this.robot.http(this.url).header('Content-Type', 'application/json').post(JSON.stringify(payload))(function(err, res, body) {
       if (err) {

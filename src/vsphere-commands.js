@@ -70,10 +70,12 @@
   // Clean up the used responders
   PacketBuilder.prototype.cleanUp = function(_this) {
     _this = _this || this;
-    for (var i = _this.questions.length; i >= 0; i--) {
+    for (var i = _this.questions.length - 1; i >= 0; i--) {
+      _this.robot.logger.info("Index of responders is: " + i);
       var index = _this.responders[_this.questions[i].regex];
-      _this.robots.listeners.splice(index, 1, function() {});
-      delete _this.responders[_this.questions[i].regex];
+      _this.robot.listeners.splice(index, 1, function() {});
+      delete _this.robot.listeners[index];
+      //delete _this.responders[_this.questions[i].regex];
     }
   };
 

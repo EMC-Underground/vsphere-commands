@@ -2,7 +2,7 @@
 
 A hubot script that allows users to interact with the [vsphere rest api](https://github.com/EMC-Underground/vsphere-python-restapi) developed by quickjp2 on github.
 
-See [`src/vsphere-commands.coffee`](src/vsphere-commands.coffee) for full documentation.
+See [`src/vsphere-commands.js`](src/vsphere-commands.js) for full documentation.
 
 ## Installation
 

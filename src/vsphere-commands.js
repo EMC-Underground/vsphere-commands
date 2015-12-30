@@ -71,9 +71,9 @@
   PacketBuilder.prototype.cleanUp = function(_this) {
     _this = _this || this;
     for (var i = _this.questions.length; i >= 0; i--) {
-      var index = _this.responders[questions[i].regex];
+      var index = _this.responders[_this.questions[i].regex];
       _this.robots.listeners.splice(index, 1, function() {});
-      delete _this.responders[questions[i].regex];
+      delete _this.responders[_this.questions[i].regex];
     }
   };
 
@@ -115,7 +115,7 @@
     for (var i = 0; i < _this.responses.length; i++) {
       var key = _this.responses[i].key;
       if (key == 'guestid'){
-        if (_this.response[i]['answer'] == ubuntu){
+        if (_this.responses[i]['answer'] == "ubuntu"){
           payload[key] = "ubuntu64Guest";
         } else {
           payload[key] = "ubuntu64Guest";

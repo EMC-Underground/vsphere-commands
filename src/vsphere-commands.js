@@ -46,6 +46,7 @@
     this.msg = msg;
     this.user = this.msg.message.user;
     this.room = this.msg.message.room;
+    this.url = url;
     this.questions = questions;
     this.responders = {};
     this.salutations = ["sweet", "cool", "awesome", "fair enough", " sounds good", "ok",
@@ -64,6 +65,7 @@
       response.question = single.question;
       this.responses.push(response);
     }
+    this.robot.logger.info(this.url);
   };
   // Clean up the used responders
   PacketBuilder.prototype.cleanUp = function(_this) {
@@ -100,7 +102,7 @@
       _this.responders[_this.questions[num].regex] = index;
     }
   };
-
+  
   PacketBuilder.prototype.sendPacket = function(_this) {
     _this = _this || this;
     _this.robot.logger.info(_this.user.name);
@@ -111,9 +113,19 @@
     };
     _this.robot.logger.info(_this.responses.length);
     for (var i = 0; i < _this.responses.length; i++) {
-      payload[responses[i].key] = _this.responses[i]['answer'];
-      _this.robot.logger.info(_this.responses[i]['answer']);
+      var key = _this.responses[i].key;
+      if (key == 'guestid'){
+        if (_this.response[i]['answer'] == ubuntu){
+          payload[key] = "ubuntu64Guest";
+        } else {
+          payload[key] = "ubuntu64Guest";
+        }
+      } else {
+        payload[key] = _this.responses[i]['answer'];
+      }
+      _this.robot.logger.info(_this.responses[i].key + " is " +_this.responses[i]['answer']);
     }
+    
     _this.robot.logger.info("Sending info to slack");
     _this.robot.send({
         room: _this.user.name
@@ -121,10 +133,8 @@
       " vm named " + payload.name +
       " with " + payload.mem +
       " megabytes of memory and " + payload.cpus + " CPUs");
-    _this.robot.logger.info("Sending packet...");
-    _this.robot.http(_this.url)
-      .header('Content-Type', 'application/json')
-      .post(JSON.stringify(payload))(function(err, res, body) {
+    _this.robot.logger.info("Sending packet to " + _this.url);
+    _this.robot.http(_this.url).header('Content-Type', 'application/json').post(JSON.stringify(payload))(function(err, res, body) {
       if (err) {
         _this.robot.logger.info("Encountered an error: " + err);
         _this.robot.send({
@@ -139,7 +149,7 @@
         }, "I have created a vm with this payload " + (JSON.stringify(payload, null, 2)));
       }
     });
-    cleanUp(_this);
+    _this.cleanUp(_this);
   };
 
   module.exports = function(robot) {
@@ -211,7 +221,8 @@
         'dataname': 'guestid',
         'regex': /(os) (.*)/i
       }];
-      var createVMPacket = new PacketBuilder(robot, msg, questions, data.url + "vms/");
+      var tmpURL = data.url + "vms/";
+      var createVMPacket = new PacketBuilder(robot, msg, questions, tmpURL);
       createVMPacket.askQuestion(0);
     });
 

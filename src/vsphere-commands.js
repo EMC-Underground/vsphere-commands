@@ -104,7 +104,7 @@
       _this.responders[_this.questions[num].regex] = index;
     }
   };
-  
+
   PacketBuilder.prototype.sendPacket = function(_this) {
     _this = _this || this;
     _this.robot.logger.info(_this.user.name);
@@ -127,7 +127,7 @@
       }
       _this.robot.logger.info(_this.responses[i].key + " is " +_this.responses[i]['answer']);
     }
-    
+
     _this.robot.logger.info("Sending info to slack");
     _this.robot.send({
         room: _this.user.name
@@ -209,19 +209,19 @@
       var questions = [{
         'question': 'How much memory in megabytes?(Format: mem <num>)',
         'dataname': 'mem',
-        'regex': /(memory\s|mem\s)(\d{1,4})(.*)?/i
+        'regex': /(memory\s|mem\s)(\d{3,4})(.*)?/i
       }, {
         'question': 'Now how many cpus? (Format: cpus <num>)',
         'dataname': 'cpus',
-        'regex': /(cpus) (.*)/i
+        'regex': /(cpus\s)(\d)(.*)?/i
       }, {
         'question': 'What would you like to call it? (Please no spaces; format: name <name>)',
         'dataname': 'name',
-        'regex': /(name) (.*)/i
+        'regex': /(name\s)([\w-]+)(.*)/i
       }, {
         'question': 'One more thing...what is the os? Sadly we can only do Ubuntu so far, so please type: os ubuntu',
         'dataname': 'guestid',
-        'regex': /(os) (.*)/i
+        'regex': /(os\s)([a-z,-]+)(.*)/i
       }];
       var tmpURL = data.url + "vms/";
       var createVMPacket = new PacketBuilder(robot, msg, questions, tmpURL);

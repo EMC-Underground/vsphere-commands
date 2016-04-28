@@ -26,15 +26,19 @@
   http = require('http');
   data = process.env.VSPHERE_API_URL;
 
-  fs.readFile('./v-config.json', function(err, contents) {
-    if (err) {
-      return console.log("Encountered an error: " + err);
-    } else {
-      data = {};
-      data = JSON.parse(contents.toString());
-      return data;
-    }
-  });
+  try {
+    fs.readFile('./v-config.json', function(err, contents) {
+      if (err) {
+        return console.log("Encountered an error: " + err);
+      } else {
+        data = {};
+        data = JSON.parse(contents.toString());
+        return data;
+      }
+    });
+  } catch (error1) {
+    return console.log("Hopefully the url has been set in the environment...");
+  }
   var responses = ["sweet", "cool", "awesome", "fair enough", " sounds good", "ok",
     "fantastic", "roger that", "got it", "perfect"
   ];

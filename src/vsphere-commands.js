@@ -24,12 +24,13 @@
 
   fs = require('fs');
   http = require('http');
-  data = {};
+  data = process.env.VSPHERE_API_URL;
 
   fs.readFile('./v-config.json', function(err, contents) {
     if (err) {
       return console.log("Encountered an error: " + err);
     } else {
+      data = {};
       data = JSON.parse(contents.toString());
       return data;
     }

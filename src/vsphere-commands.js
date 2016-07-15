@@ -124,6 +124,8 @@
       if (key == 'guestid'){
         if (_this.responses[i]['answer'] == "ubuntu"){
           payload[key] = "ubuntu64Guest";
+        } else if (_this.responses[i]['answer'] == "centos"){
+          payload[key] = "centos64Guest";
         } else {
           payload[key] = "ubuntu64Guest";
         }
@@ -224,7 +226,7 @@
         'dataname': 'name',
         'regex': /(name\s)([\w-]+)(.*)/i
       }, {
-        'question': 'One more thing...what is the os? Sadly we can only do Ubuntu so far, so please type: os ubuntu',
+        'question': 'One more thing...what is the os? We can provision Ubuntu or CentOS! Please type one of the following: os ubuntu, os centos',
         'dataname': 'guestid',
         'regex': /(os\s)([a-z,-]+)(.*)/i
       }];

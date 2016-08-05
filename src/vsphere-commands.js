@@ -129,6 +129,12 @@
         } else {
           payload[key] = "ubuntu64Guest";
         }
+      } else if (key == 'language' || key == 'application'){
+        if (_this.responses[i]['answer'] == "NA"){
+          continue;
+        } else {
+          payload[key] = _this.responses[i]['answer'];
+        }
       } else {
         payload[key] = _this.responses[i]['answer'];
       }
@@ -226,11 +232,11 @@
         'dataname': 'name',
         'regex': /(name\s)([\w-]+)(.*)/i
       }, {
-        'question': 'What coding language will you use (if any)? (Format: language <language>)',
+        'question': 'What coding language will you use (if any)? (Format: language <language> or language NA)',
         'dataname': 'language',
         'regex': /(language\s)([\w-]+)(.*)/i
       },{
-        'question': 'What application framework will you use (if any)? (Format: application <application>)',
+        'question': 'What application framework will you use (if any)? (Format: application <application> or application NA)',
         'dataname': 'applicaion',
         'regex': /(language\s)([\w-]+)(.*)/i
       },{

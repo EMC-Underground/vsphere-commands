@@ -237,8 +237,8 @@
         'regex': /(language\s)([\w-]+)(.*)/i
       },{
         'question': 'What application framework will you use (if any)? (Format: application <application> or application NA)',
-        'dataname': 'applicaion',
-        'regex': /(language\s)([\w-]+)(.*)/i
+        'dataname': 'application',
+        'regex': /(application\s)([\w-]+)(.*)/i
       },{
         'question': 'One more thing...what is the os? We can provision Ubuntu or CentOS! Please type one of the following: os ubuntu, os centos',
         'dataname': 'guestid',

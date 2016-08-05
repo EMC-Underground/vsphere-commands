@@ -226,6 +226,14 @@
         'dataname': 'name',
         'regex': /(name\s)([\w-]+)(.*)/i
       }, {
+        'question': 'What coding language will you use (if any)? (Format: language <language>)',
+        'dataname': 'language',
+        'regex': /(language\s)([\w-]+)(.*)/i
+      },{
+        'question': 'What application framework will you use (if any)? (Format: application <application>)',
+        'dataname': 'applicaion',
+        'regex': /(language\s)([\w-]+)(.*)/i
+      },{
         'question': 'One more thing...what is the os? We can provision Ubuntu or CentOS! Please type one of the following: os ubuntu, os centos',
         'dataname': 'guestid',
         'regex': /(os\s)([a-z,-]+)(.*)/i

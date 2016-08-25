@@ -215,7 +215,7 @@
         }
       });
     });
-    robot.respond(/(create me vm)/i, function(msg) {
+    robot.respond(/create me [a\s]*vm/i, function(msg) {
       robot.send({
         room: msg.envelope.user.name
       }, "Lets do it!");

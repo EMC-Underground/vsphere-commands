@@ -168,7 +168,7 @@
   };
 
   module.exports = function(robot) {
-    robot.respond(/(list all vms)/i, function(msg) {
+    robot.respond(/list [me\s]*all vms/i, function(msg) {
       return robot.http(data.url + "vms/").get()(function(err, res, body) {
         var all_vms, i, j, len, vm, vms;
         if (err) {
